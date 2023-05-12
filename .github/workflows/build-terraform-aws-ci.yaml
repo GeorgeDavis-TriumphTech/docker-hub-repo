@@ -2,8 +2,8 @@ name: Publish terraform-aws-ci Docker image
 
 on:
   push:
-    tags:
-      - "v*"
+    paths:
+      - terraform-aws-ci/**
 
   workflow_dispatch:
 
