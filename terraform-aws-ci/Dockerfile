@@ -1,10 +1,12 @@
-ARG ARG_BASE_VERSION=1.3.7
-FROM hashicorp/terraform:$ARG_BASE_VERSION
+ARG ARG_BASE_VERSION=latest
+FROM alpine:$ARG_BASE_VERSION
 
 # ARG_AWSCLI_VERSION has to be a specific version number, available on https://awscli.amazonaws.com/ and be a tar.gz file. Eg. 2.11.15
 ARG ARG_AWSCLI_VERSION=2.11.15
+ARG ARG_TERRAFORM_VERSION=1.3.7
 
 ENV AWSCLI_VERSION=$ARG_AWSCLI_VERSION \
+    TERRAFORM_VERSION=${ARG_TERRAFORM_VERSION} \
     PYTHONUNBUFFERED=1 \ 
     AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
     AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
@@ -33,4 +35,8 @@ RUN apk add --no-cache --quiet --no-progress \
 
 ENV PATH=$PATH:/opt/aws-cli/lib/aws-cli/bin
 
-CMD [ "terraform" ]
+RUN wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
+    unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
+    mv terraform /usr/bin/terraform
+
+CMD [ "/usr/bin/terraform" ]
