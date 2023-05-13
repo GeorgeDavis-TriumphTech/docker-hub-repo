@@ -4,6 +4,8 @@ This image provides the use of Terraform CLI and AWS CLI in one simple lightweig
 
 It exposes `terraform` as an executable.
 
+Source: [https://github.com/GeorgeDavis-TriumphTech/docker-hub-repo/tree/main/terraform-aws-ci](https://github.com/GeorgeDavis-TriumphTech/docker-hub-repo/tree/main/terraform-aws-ci)
+
 ## Usage 
 
 ```sh

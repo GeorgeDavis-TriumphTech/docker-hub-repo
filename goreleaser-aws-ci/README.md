@@ -4,6 +4,8 @@ This image provides the use of GoReleaser and AWS CLI in one simple lightweight 
 
 It exposes `goreleaser` as an executable.
 
+Source: [https://github.com/GeorgeDavis-TriumphTech/docker-hub-repo/tree/main/goreleaser-aws-ci](https://github.com/GeorgeDavis-TriumphTech/docker-hub-repo/tree/main/goreleaser-aws-ci)
+
 ## Usage 
 
 ```sh
