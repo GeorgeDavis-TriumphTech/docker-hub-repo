@@ -42,4 +42,6 @@ RUN wget "https://github.com/goreleaser/goreleaser/releases/download/v${GORELEAS
     rm goreleaser_${GORELEASER_VERSION}_x86_64.apk && \
     rm /var/cache/apk/*
 
+RUN rm -rf awscli-${AWSCLI_VERSION}
+
 CMD [ "goreleaser" ]
