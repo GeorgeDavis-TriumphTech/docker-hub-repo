@@ -39,4 +39,7 @@ RUN wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform
     unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
     mv terraform /usr/bin/terraform
 
+RUN rm -rf awscli-${AWSCLI_VERSION} && \
+    rm -rf terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+
 CMD [ "/usr/bin/terraform" ]
