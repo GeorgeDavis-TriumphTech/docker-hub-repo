@@ -27,6 +27,8 @@ RUN apk add --no-cache --quiet --no-progress \
     libffi-dev \
     openssl-dev \
     tar \
+    jq \
+    zip \
     && curl https://awscli.amazonaws.com/awscli-${AWSCLI_VERSION}.tar.gz | tar -xz \
     && cd awscli-${AWSCLI_VERSION} \
     && ./configure --prefix=/opt/aws-cli/ --with-download-deps \
