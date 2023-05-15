@@ -35,11 +35,11 @@ RUN apk add --no-cache --quiet --no-progress \
 
 ENV PATH=$PATH:/opt/aws-cli/lib/aws-cli/bin
 
-RUN wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
-    unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
-    mv terraform /usr/bin/terraform
-
-RUN rm -rf awscli-${AWSCLI_VERSION} && \
-    rm -rf terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+RUN cd / \
+    && wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
+    && unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
+    && mv terraform /usr/bin/terraform \
+    && rm -rf /awscli-${AWSCLI_VERSION} \
+    && rm -rf /terraform_${TERRAFORM_VERSION}_linux_amd64.zip
 
 CMD [ "/usr/bin/terraform" ]
