@@ -42,4 +42,4 @@ RUN cd / \
     && rm -rf /awscli-${AWSCLI_VERSION} \
     && rm -rf /terraform_${TERRAFORM_VERSION}_linux_amd64.zip
 
-CMD [ "/usr/bin/terraform" ]
+ENTRYPOINT [ "/bin/sh", "-c" ]
