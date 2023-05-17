@@ -1,45 +1,60 @@
-ARG ARG_BASE_VERSION=latest
-FROM alpine:$ARG_BASE_VERSION
-
-# ARG_AWSCLI_VERSION has to be a specific version number, available on https://awscli.amazonaws.com/ and be a tar.gz file. Eg. 2.11.15
+# Credits: https://github.com/zenika-open-source/terraform-aws-cli/blob/master/Dockerfile
+# Setup build arguments
 ARG ARG_AWSCLI_VERSION=2.11.15
 ARG ARG_TERRAFORM_VERSION=1.3.7
+ARG PYTHON_MAJOR_VERSION=3.9
+ARG DEBIAN_VERSION=bullseye-20230109-slim
+ARG DEBIAN_FRONTEND=noninteractive
 
-ENV AWSCLI_VERSION=$ARG_AWSCLI_VERSION \
-    TERRAFORM_VERSION=${ARG_TERRAFORM_VERSION} \
-    PYTHONUNBUFFERED=1 \ 
-    AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} \
-    AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} \
-    AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION} \
-    AWS_REGION=${AWS_DEFAULT_REGION}
+# Download Terraform binary
+FROM debian:${DEBIAN_VERSION} as terraform
+ARG TARGETARCH=amd64
+ARG ARG_TERRAFORM_VERSION=1.3.7
+RUN apt-get update && apt-get install --no-install-recommends -y \
+  libcurl4 \
+  curl \
+  ca-certificates=20210119 \
+  unzip=6.0-26+deb11u1 \
+  gnupg=2.2.27-2+deb11u2
+WORKDIR /workspace
+RUN curl --silent --show-error --fail --remote-name https://releases.hashicorp.com/terraform/${ARG_TERRAFORM_VERSION}/terraform_${ARG_TERRAFORM_VERSION}_linux_${TARGETARCH}.zip
+RUN unzip -j terraform_${ARG_TERRAFORM_VERSION}_linux_${TARGETARCH}.zip
 
-# Building aws-cli from source, to run on alpinelinux (hashicorp/terraform Docker container)
-# Source: AWS Docs - https://docs.aws.amazon.com/cli/latest/userguide/getting-started-source-install.html#source-getting-started-install-workflows-alpine
-RUN apk add --no-cache --quiet --no-progress \
-    python3-dev \
-    python3 \
-    curl \
-    make \
-    cmake \
-    gcc \
-    g++ \
-    libc-dev \
-    libffi-dev \
-    openssl-dev \
-    tar \
-    && curl https://awscli.amazonaws.com/awscli-${AWSCLI_VERSION}.tar.gz | tar -xz \
-    && cd awscli-${AWSCLI_VERSION} \
-    && ./configure --prefix=/opt/aws-cli/ --with-download-deps \
-    && make \
-    && make install
+# Install AWS CLI using PIP
+FROM debian:${DEBIAN_VERSION} as aws-cli
+ARG ARG_AWSCLI_VERSION=2.11.15
+ARG PYTHON_MAJOR_VERSION
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3=${PYTHON_MAJOR_VERSION}.2-3 \
+    python3-pip=20.3.4-4+deb11u1 \
+  && pip3 install --no-cache-dir \
+    setuptools==67.1.0 \
+    awscli
 
-ENV PATH=$PATH:/opt/aws-cli/lib/aws-cli/bin
+# Build final image
+FROM debian:${DEBIAN_VERSION} as build
+LABEL maintainer="GeorgeDavis-TriumphTech@github"
+ARG PYTHON_MAJOR_VERSION
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends \
+    ca-certificates=20210119\
+    git \
+    jq \
+    python3=${PYTHON_MAJOR_VERSION}.2-3 \
+    openssh-client=1:8.4p1-5+deb11u1 \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/* \
+  && update-alternatives --install /usr/bin/python python /usr/bin/python${PYTHON_MAJOR_VERSION} 1
+WORKDIR /workspace
+COPY --from=terraform /workspace/terraform /usr/local/bin/terraform
+COPY --from=aws-cli /usr/local/bin/aws* /usr/local/bin/
+COPY --from=aws-cli /usr/local/lib/python${PYTHON_MAJOR_VERSION}/dist-packages /usr/local/lib/python${PYTHON_MAJOR_VERSION}/dist-packages
+COPY --from=aws-cli /usr/lib/python3/dist-packages /usr/lib/python3/dist-packages
 
-RUN cd / \
-    && wget https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
-    && unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
-    && mv terraform /usr/bin/terraform \
-    && rm -rf /awscli-${AWSCLI_VERSION} \
-    && rm -rf /terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+RUN groupadd --gid 1001 nonroot \
+  # user needs a home folder to store aws credentials
+  && useradd --gid nonroot --create-home --uid 1001 nonroot \
+  && chown nonroot:nonroot /workspace
+USER nonroot
 
-ENTRYPOINT [ "/usr/bin/terraform" ]
+CMD ["bash"]
