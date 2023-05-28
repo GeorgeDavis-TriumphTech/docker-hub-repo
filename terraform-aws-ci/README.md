@@ -57,7 +57,7 @@ terraform-aws-ci:latest <your-terraform-command>
 
 | Build Variables  | Default |
 | ------------- | ------------- |
-| ARG_BASE_VERSION  | 1.3.7  |
+| ARG_BASE_VERSION  | 1.4.0  |
 | ARG_AWSCLI_VERSION  | 2.11.15  |
 
 

@@ -1,7 +1,7 @@
 # Credits: https://github.com/zenika-open-source/terraform-aws-cli/blob/master/Dockerfile
 # Setup build arguments
 ARG ARG_AWSCLI_VERSION=2.11.15
-ARG ARG_TERRAFORM_VERSION=1.3.7
+ARG ARG_TERRAFORM_VERSION=1.4.0
 ARG PYTHON_MAJOR_VERSION=3.9
 ARG DEBIAN_VERSION=bullseye-20230109-slim
 ARG DEBIAN_FRONTEND=noninteractive
@@ -9,7 +9,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 # Download Terraform binary
 FROM debian:${DEBIAN_VERSION} as terraform
 ARG TARGETARCH=amd64
-ARG ARG_TERRAFORM_VERSION=1.3.7
+ARG ARG_TERRAFORM_VERSION=1.4.0
 RUN apt-get update && apt-get install --no-install-recommends -y \
   libcurl4 \
   curl \
