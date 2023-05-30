@@ -42,6 +42,7 @@ RUN apt-get update \
     jq \
     python3=${PYTHON_MAJOR_VERSION}.2-3 \
     openssh-client=1:8.4p1-5+deb11u1 \
+    postgresql-contrib \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/* \
   && update-alternatives --install /usr/bin/python python /usr/bin/python${PYTHON_MAJOR_VERSION} 1
